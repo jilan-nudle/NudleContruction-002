@@ -496,7 +496,7 @@ var createScene = async function () {
     TOPMENU.disableAdditionalButtons(true);
 
 
-    const MAINOBJECT = new SceneObject("/assets/models/TrussRoofing(Animation).glb", scene);
+    const MAINOBJECT = new SceneObject("https://raw.githubusercontent.com/jilan-nudle/NudleContruction-002/main/assets/models/TrussRoofing(Animation).glb", scene);
     await MAINOBJECT.loadObject();
     MAINOBJECT.setVisible(false);
     MAINOBJECT.setParent(ROOT);
