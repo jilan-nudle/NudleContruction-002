@@ -159,9 +159,6 @@ export default class SceneObject{
 
                         if (meshY <= planeY) {
                             mesh.isVisible = true;
-                            if (mesh.name === "Cement") {
-                                console.log("Cement is below the plane");
-                            }
                         } else {
                             mesh.isVisible = false;
                         }

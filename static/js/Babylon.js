@@ -5,7 +5,6 @@ import XRChangeManager from "./XRChangeManager.js";
 import BlobShadow from "./BlobShadow.js";
 import BaseState from "./FlowEngine/BaseState.js";
 import FlowEngine from "./FlowEngine/FlowEngine.js";
-import ZoomInMarker from "./ZoomInMarker.js";
 
 
 var canvas = document.getElementById("renderCanvas");
@@ -111,7 +110,7 @@ class OverviewScene extends BaseState {
 
             const object = engine.context.mainObject;
             object.setVisible(true);
-            engine.context.root.scaling = new BABYLON.Vector3(0.65, 0.65, 0.65);
+            engine.context.root.scaling = new BABYLON.Vector3(0.7, 0.7, 0.7);
 
 
             // changing topmenu icon
@@ -207,9 +206,6 @@ class Slide3Scene extends BaseState {
         engine.context.topMenu.maximizeCaption();
         engine.context.mainObject.setVisible(true);
 
-        this.ancZoom = new ZoomInMarker(0.5, engine.context.mainObject.findMesh("Wall"), engine.context.scene);
-        const ancZoom = this.ancZoom
-        ancZoom.linkMesh(new BABYLON.Vector3(1,1,1));
 
         // setting camera angle
         engine.context.mainObject.faceCameraByMesh("topplank.001", engine.context.scene.activeCamera, 35, 30);
@@ -219,8 +215,47 @@ class Slide3Scene extends BaseState {
         engine.context.topMenu.setCaption("A hurricane clip is a small angled metal connector that fastens roof trusses or rafters securely to the wall plate, preventing them from being lifted by strong winds. By reinforcing the joint between roof and wall, it helps keep the entire structure stable and reduces the risk of the roof blowing off during storms.");
         engine.context.mainObject.playAnimation("Animation", false, 1, 600, 840);
 
-        // setting up zoom in marker
-        ancZoom.setVideo("assets/media/anchorstrap_zoom.mp4");
+
+        // attaching label
+        var rect = new BABYLON.GUI.Rectangle();
+        this.rect = rect;
+        rect.height = "30px";
+        rect.width = "350px";
+        rect.background = "black";
+
+        var text = new BABYLON.GUI.TextBlock();
+        text.text = "Take a closer look at the blinking object";
+        text.color = "white";
+
+        rect.addControl(text);
+
+        engine.context.advancedTexture.addControl(rect);
+        rect.linkWithMesh(engine.context.mainObject.findMesh("Wall"));
+
+        // hightlighting object
+        const connector = engine.context.mainObject.findMesh("Connecter");
+        this.connector = connector;
+        this.originalMat = connector.material;
+
+        var mat = new BABYLON.StandardMaterial("mat", engine.context.scene);
+        mat.emissiveColor = new BABYLON.Color3(0.72, 0.25, 0.62); // neon green
+        connector.material = mat;
+
+        var gl = new BABYLON.GlowLayer("glow", engine.context.scene);
+        gl.intensity = 0.8;  // adjust brightness
+
+        // Blink animation
+        let toggle = true;
+
+        this.myInterval = setInterval(() => {
+            toggle = !toggle;
+            gl.isEnabled = toggle;
+            if(toggle){
+                connector.material = mat;
+            }else{
+                connector.material = this.originalMat;
+            }
+        }, 1000); // blink every 500ms
 
 
     }
@@ -229,7 +264,13 @@ class Slide3Scene extends BaseState {
         engine.context.topMenu.setVisible(false);
         engine.context.topMenu.minimizeCaption();
         engine.context.mainObject.setVisible(false);
-        //this.ancZoom.dispose();
+
+        this.connector.material = this.originalMat;
+        clearInterval(this.myInterval);
+        this.rect.dispose();
+
+
+
     }
 
 }
@@ -253,12 +294,58 @@ class Slide4Scene extends BaseState {
         engine.context.topMenu.setCaption("Wall straps are long metal strips fixed into the wall and tied over roof trusses to hold them firmly in place. They provide extra anchorage, helping transfer the roof’s weight into the walls and preventing the trusses from lifting or shifting in strong winds or storms.");
         engine.context.mainObject.playAnimation("Animation", false, 1, 840, 1100);
 
+
+        // attaching label
+        var rect = new BABYLON.GUI.Rectangle();
+        this.rect = rect;
+        rect.height = "30px";
+        rect.width = "350px";
+        rect.background = "black";
+
+        var text = new BABYLON.GUI.TextBlock();
+        text.text = "Take a closer look at the blinking object";
+        text.color = "white";
+
+        rect.addControl(text);
+
+        engine.context.advancedTexture.addControl(rect);
+        rect.linkWithMesh(engine.context.mainObject.findMesh("Wall"));
+
+        // hightlighting object
+        const anchorStrap = engine.context.mainObject.findMesh("AnchorStrap");
+        this.anchorStrap = anchorStrap;
+        this.originalMat = anchorStrap.material;
+
+        var mat = new BABYLON.StandardMaterial("mat", engine.context.scene);
+        mat.emissiveColor = new BABYLON.Color3(0.72, 0.25, 0.62); // neon green
+        anchorStrap.material = mat;
+
+        var gl = new BABYLON.GlowLayer("glow", engine.context.scene);
+        gl.intensity = 0.8;  // adjust brightness
+
+        // Blink animation
+        let toggle = true;
+
+        this.myInterval = setInterval(() => {
+            toggle = !toggle;
+            gl.isEnabled = toggle;
+            if(toggle){
+                anchorStrap.material = mat;
+            }else{
+                anchorStrap.material = this.originalMat;
+            }
+        }, 1000); // blink every 500ms
+
     }
 
     async exit(engine) {
         engine.context.topMenu.setVisible(false);
         engine.context.topMenu.minimizeCaption();
         engine.context.mainObject.setVisible(false);
+
+        this.anchorStrap.material = this.originalMat;
+        clearInterval(this.myInterval);
+        this.rect.dispose();
     }
 
 }
@@ -409,7 +496,7 @@ var createScene = async function () {
     TOPMENU.disableAdditionalButtons(true);
 
 
-    const MAINOBJECT = new SceneObject("https://raw.githubusercontent.com/jilan-nudle/NudleContruction-002/main/assets/models/TrussRoofing(Animation).glb", scene);
+    const MAINOBJECT = new SceneObject("/assets/models/TrussRoofing(Animation).glb", scene);
     await MAINOBJECT.loadObject();
     MAINOBJECT.setVisible(false);
     MAINOBJECT.setParent(ROOT);
